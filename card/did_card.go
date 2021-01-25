@@ -17,8 +17,8 @@ func init() {
 type DIDCard interface {
 	PublicKey() string
 	Sign(msg []byte) []byte
-	Verify(pub, sig, msg []byte) bool
 	Open(auth string) bool
+	IsOpen() bool
 }
 
 type SimpleCard struct {
@@ -42,23 +42,6 @@ func (sc *SimpleCard) Sign(msg []byte) []byte {
 	return signature.Serialize()
 }
 
-func (sc *SimpleCard) Verify(pub, sig, msg []byte) bool {
-	var pubKey bls12.PublicKey
-	if err := pubKey.Deserialize(pub); err != nil {
-		return false
-	}
-
-	var signature bls12.Sign
-	if err := signature.Deserialize(sig); err != nil {
-		return false
-	}
-	if pubKey.IsZero() {
-		return false
-	}
-
-	return signature.VerifyByte(&pubKey, msg)
-}
-
 func (sc *SimpleCard) Open(auth string) bool {
 
 	if sc.priKey != nil {
@@ -76,6 +59,10 @@ func (sc *SimpleCard) Open(auth string) bool {
 
 	sc.priKey = secKey
 	return true
+}
+
+func (sc *SimpleCard) IsOpen() bool {
+	return sc.priKey != nil
 }
 
 func NewSimpleCard(auth string) (DIDCard, error) {
@@ -122,4 +109,21 @@ func LoadCard(fullPath string) (DIDCard, error) {
 		return nil, err
 	}
 	return card, nil
+}
+
+func Verify(pub, sig, msg []byte) bool {
+	var pubKey bls12.PublicKey
+	if err := pubKey.Deserialize(pub); err != nil {
+		return false
+	}
+
+	var signature bls12.Sign
+	if err := signature.Deserialize(sig); err != nil {
+		return false
+	}
+	if pubKey.IsZero() {
+		return false
+	}
+
+	return signature.VerifyByte(&pubKey, msg)
 }
