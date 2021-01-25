@@ -15,7 +15,7 @@ func init() {
 }
 
 type DIDCard interface {
-	PublicKey() string
+	PublicKey() DID
 	Sign(msg []byte) []byte
 	Open(auth string) bool
 	IsOpen() bool
@@ -24,12 +24,12 @@ type DIDCard interface {
 type SimpleCard struct {
 	Crypto  map[string]interface{} `json:"crypto"`
 	ID      string                 `json:"uuid"`
-	PubKey  string                 `json:"pubkey"`
+	PubKey  DID                    `json:"pubkey"`
 	Version uint                   `json:"version"`
 	priKey  *bls12.SecretKey
 }
 
-func (sc *SimpleCard) PublicKey() string {
+func (sc *SimpleCard) PublicKey() DID {
 	return sc.PubKey
 }
 
@@ -76,7 +76,7 @@ func NewSimpleCard(auth string) (DIDCard, error) {
 	if err != nil {
 		return nil, err
 	}
-	pubKey := string(secKey.GetPublicKey().Serialize())
+	pubKey := Parse(secKey.GetPublicKey().Serialize())
 
 	encryptor := ksv4.New()
 	cryptoFields, err := encryptor.Encrypt(secKey.Serialize(), auth)
