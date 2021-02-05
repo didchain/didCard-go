@@ -1,4 +1,4 @@
-package ios
+package iosLib
 
 import (
 	"encoding/json"
