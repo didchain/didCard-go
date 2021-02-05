@@ -17,3 +17,4 @@ bin/ios*
 /.idea/didCard-go.iml
 /.idea/modules.xml
 /.idea/vcs.xml
+*.DS_Store
