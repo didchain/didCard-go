@@ -18,3 +18,4 @@ bin/ios*
 /.idea/modules.xml
 /.idea/vcs.xml
 *.DS_Store
+bin/dss*
