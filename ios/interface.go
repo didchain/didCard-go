@@ -1,29 +1,25 @@
 package iosLib
 
 import (
-	"encoding/json"
-	"github.com/didchain/didCard-go/card"
+	"github.com/didchain/didCard-go/account"
 )
 
-var _cardInst card.DIDCard = nil
+var _cardInst account.Wallet = nil
 
 func NewCard(auth string) []byte {
-	card, err := card.NewSimpleCard(auth)
+	card, err := account.NewWallet(auth)
 	if err != nil {
 		return nil
 	}
 
-	encodedFile, err := json.MarshalIndent(card, "", "\t")
-	if err != nil {
-		return nil
-	}
+	encodedFile := card.Bytes()
 
 	_cardInst = card
 	return encodedFile
 }
 
 func LoadCard(jsonStr string) bool {
-	card, err := card.ParseCard(jsonStr)
+	card, err := account.LoadWalletByData(jsonStr)
 	if err != nil {
 		return false
 	}
@@ -32,7 +28,7 @@ func LoadCard(jsonStr string) bool {
 }
 
 func LoadCardByPath(fullPath string) bool {
-	card, err := card.LoadCard(fullPath)
+	card, err := account.LoadWallet(fullPath)
 	if err != nil {
 		return false
 	}
@@ -41,15 +37,15 @@ func LoadCardByPath(fullPath string) bool {
 }
 
 func Import(auth, jsonStr string) []byte {
-	card, err := card.ParseCard(jsonStr)
+	card, err := account.LoadWalletByData(jsonStr)
 	if err != nil {
 		return nil
 	}
-	if !card.Open(auth) {
+	if err:=card.Open(auth);err!=nil {
 		return nil
 	}
 	_cardInst = card
-	return []byte(card.PublicKey())
+	return []byte(card.Did())
 }
 
 func Open(auth string) bool {
@@ -57,7 +53,11 @@ func Open(auth string) bool {
 		return false
 	}
 
-	return _cardInst.Open(auth)
+	if err:= _cardInst.Open(auth);err!=nil{
+		return false
+	}
+
+	return true
 }
 
 func IsOpen() bool {
@@ -81,5 +81,5 @@ func Sign(msg string) []byte {
 }
 
 func Verify(pub, msg, sig []byte) bool {
-	return card.Verify(pub, sig, msg)
+	return account.VerifySig(account.ConvertToID2(pub), sig, msg)
 }
