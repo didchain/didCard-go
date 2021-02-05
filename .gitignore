@@ -13,3 +13,7 @@
 bin/ios*
 # Dependency directories (remove the comment below to include it)
 # vendor/
+/.idea/.gitignore
+/.idea/didCard-go.iml
+/.idea/modules.xml
+/.idea/vcs.xml
