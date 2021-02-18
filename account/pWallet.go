@@ -3,6 +3,7 @@ package account
 import (
 	"crypto/ed25519"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 )
 
@@ -43,6 +44,13 @@ func (pw *PWallet) Open(auth string) error {
 	if err != nil {
 		return err
 	}
+
+	pubk:=privkey.Public()
+	id := ConvertToID2(pubk.(ed25519.PublicKey))
+	if pw.DidAddr.String() != id.String(){
+		return errors.New("open failed, may be password is not correct")
+	}
+
 	key := &WalletKey{
 		PriKey: privkey,
 	}
