@@ -1,4 +1,4 @@
-package android
+package androidgolib
 
 import (
 	"errors"
@@ -7,53 +7,52 @@ import (
 
 var _cardInst account.Wallet = nil
 
-func NewCard(auth string) []byte {
+func NewCard(auth string) ([]byte, error) {
 	card, err := account.NewWallet(auth)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	encodedFile := card.Bytes()
 
 	_cardInst = card
-	return encodedFile
+	return encodedFile, nil
 }
 
-func LoadCard(jsonStr string) bool {
+func LoadCard(jsonStr string) (bool, error) {
 	card, err := account.LoadWalletByData(jsonStr)
 	if err != nil {
-		return false
+		return false, err
 	}
 	_cardInst = card
-	return true
+	return true, nil
 }
 
-func LoadCardByPath(fullPath string) bool {
+func LoadCardByPath(fullPath string) (bool, error) {
 	card, err := account.LoadWallet(fullPath)
 	if err != nil {
-		return false
+		return false, err
 	}
 	_cardInst = card
-	return true
+	return true, nil
 }
 
-func Import(auth, jsonStr string) []byte {
+func Import(auth, jsonStr string) ([]byte, error) {
 	card, err := account.LoadWalletByData(jsonStr)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	if err:=card.Open(auth);err!=nil {
-		return nil
+	if err := card.Open(auth); err != nil {
+		return nil, err
 	}
 	_cardInst = card
-	return []byte(card.Did())
+	return []byte(card.Did()), nil
 }
 
 func Open(auth string) error {
 	if _cardInst == nil {
 		return errors.New("no card instance")
 	}
-
 	return _cardInst.Open(auth)
 }
 
@@ -79,4 +78,11 @@ func Sign(msg string) []byte {
 
 func Verify(pub, msg, sig []byte) bool {
 	return account.VerifySig(account.ConvertToID2(pub), sig, msg)
+}
+
+func Close() {
+	if _cardInst == nil {
+		return
+	}
+	_cardInst.Close()
 }
