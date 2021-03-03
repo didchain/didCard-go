@@ -78,8 +78,9 @@ func Sign(msg string) string {
 	return base58.Encode(sig)
 }
 
-func Verify(pub, msg, sig []byte) bool {
-	return account.VerifySig(account.ConvertToID2(pub), sig, msg)
+func Verify(pub []byte, msg interface{}, sig string) bool {
+	sigbytes:=base58.Decode(sig)
+	return account.VerifySig(account.ConvertToID2(pub), sigbytes, msg)
 }
 
 func Close() {
