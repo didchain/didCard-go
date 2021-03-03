@@ -72,6 +72,8 @@ func (pw *PWallet)Bytes() []byte  {
 		return nil
 	}
 
+
+
 	return b
 }
 

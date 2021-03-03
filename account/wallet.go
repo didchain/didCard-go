@@ -1,7 +1,6 @@
 package account
 
 import (
-
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/json"
@@ -87,7 +86,9 @@ func decryptPriKey(didAddr ID, cpTxt, auth string) (ed25519.PrivateKey, error) {
 	if err != nil {
 		return nil, err
 	}
+	//fmt.Println("aes key == >: ",hex.EncodeToString(aesKey))
 	cipherByte := base58.Decode(cpTxt)
+	//fmt.Println("cipher base16 == >: ",hex.EncodeToString(cipherByte))
 	privBytes := make([]byte, len(cipherByte))
 	copy(privBytes, cipherByte)
 	return Decrypt(aesKey, privBytes)

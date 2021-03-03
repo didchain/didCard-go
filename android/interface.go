@@ -2,6 +2,7 @@ package androidgolib
 
 import (
 	"errors"
+	"github.com/btcsuite/btcutil/base58"
 	"github.com/didchain/didCard-go/account"
 )
 
@@ -72,8 +73,9 @@ func SignByPassword(msg, auth string) []byte {
 	return _cardInst.Sign([]byte(msg))
 }
 
-func Sign(msg string) []byte {
-	return _cardInst.Sign([]byte(msg))
+func Sign(msg string) string {
+	sig:= _cardInst.Sign([]byte(msg))
+	return base58.Encode(sig)
 }
 
 func Verify(pub, msg, sig []byte) bool {
