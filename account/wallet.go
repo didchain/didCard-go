@@ -22,6 +22,10 @@ type Wallet interface {
 	VerifySigObj(obj interface{}, signature []byte) bool
 
 	Open(auth string) error
+
+	DriveAESKey(auth string) (string,error)
+	OpenWithAesKey(key string) error
+
 	IsOpen() bool
 	SaveToPath(wPath string) error
 	String() string
@@ -36,6 +40,7 @@ type WalletKey struct {
 type PWallet struct {
 	Version   int                 `json:"version"`
 	DidAddr   ID 				  `json:"did"`
+	Salt      string              `json:"salt,omitempty"`
 	CipherTxt string 			  `json:"cipher_txt"`
 	key       *WalletKey          `json:"-"`
 }
@@ -47,7 +52,7 @@ func NewWallet(auth string) (Wallet, error) {
 		logger.Errorf("Error generate network key: %v", err)
 		return nil, err
 	}
-	cipherTxt, err := encryptPriKey(pri, pub, auth)
+	cipherTxt,_, err := encryptPriKey(pri, pub[:KP.S], auth)
 	if err != nil {
 		logger.Errorf("encrypt wallet err:%f", err)
 		return nil, err
@@ -64,25 +69,22 @@ func NewWallet(auth string) (Wallet, error) {
 	return obj, nil
 }
 
-
-
-func encryptPriKey(priKey ed25519.PrivateKey, pubKey ed25519.PublicKey, auth string) (string, error) {
-	aesKey, err := AESKey(pubKey[:KP.S], auth)
+func encryptPriKey(priKey ed25519.PrivateKey, salt []byte, auth string) (string,string, error) {
+	aesKey, err := AESKey(salt, auth)
 	if err != nil {
 		logger.Warning("error to generate aes key:->", err)
-		return "", err
+		return "", "",err
 	}
 	cipher, err := Encrypt(aesKey, priKey[:])
 	if err != nil {
 		logger.Warning("error to encrypt the raw private key:->", err)
-		return "", err
+		return "","", err
 	}
-	return base58.Encode(cipher), nil
+	return base58.Encode(cipher),base58.Encode(aesKey), nil
 }
 
-func decryptPriKey(didAddr ID, cpTxt, auth string) (ed25519.PrivateKey, error) {
-	pk := didAddr.ToPubKey()
-	aesKey, err := AESKey(pk[:KP.S], auth)
+func decryptPriKey(salt []byte, cpTxt, auth string) (ed25519.PrivateKey, error) {
+	aesKey, err := AESKey(salt, auth)
 	if err != nil {
 		return nil, err
 	}
@@ -93,6 +95,15 @@ func decryptPriKey(didAddr ID, cpTxt, auth string) (ed25519.PrivateKey, error) {
 	copy(privBytes, cipherByte)
 	return Decrypt(aesKey, privBytes)
 }
+
+func decryptPrivKeyByAesKey(aesKey []byte,cpTxt string) (ed25519.PrivateKey,error)  {
+	cipherByte := base58.Decode(cpTxt)
+	//fmt.Println("cipher base16 == >: ",hex.EncodeToString(cipherByte))
+	privBytes := make([]byte, len(cipherByte))
+	copy(privBytes, cipherByte)
+	return Decrypt(aesKey, privBytes)
+}
+
 
 func LoadWallet(wPath string) (Wallet, error) {
 	jsonStr, err := ioutil.ReadFile(wPath)

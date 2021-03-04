@@ -1,6 +1,7 @@
 package iosLib
 
 import (
+	"encoding/json"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/didchain/didCard-go/account"
 )
@@ -61,6 +62,46 @@ func Open(auth string) bool {
 	return true
 }
 
+
+type DeriveKey struct {
+	AesKey string `json:"aes_key"`
+	CardBytes []byte `json:"card_bytes"`
+}
+
+//AES Key is generate by a new salt, need to save it
+func DeriveAesKey(auth string) (string)  {
+	if _cardInst == nil {
+		return ""
+	}
+
+	aesKey,err := _cardInst.DriveAESKey(auth)
+	if err!=nil{
+		return ""
+	}
+
+	dk:=&DeriveKey{
+		AesKey: aesKey,
+		CardBytes: _cardInst.Bytes(),
+	}
+	j,_:=json.Marshal(*dk)
+
+	return string(j)
+}
+
+func OpenWithAesKey(aesKey string) string  {
+	if _cardInst == nil {
+		return "no card instance"
+	}
+
+	err := _cardInst.OpenWithAesKey(aesKey)
+	if err!=nil{
+		return "open failed"
+	}
+	return ""
+}
+
+
+
 func IsOpen() bool {
 	if _cardInst == nil {
 		return false
@@ -76,6 +117,7 @@ func SignByPassword(msg, auth string) []byte {
 	_cardInst.Open(auth)
 	return _cardInst.Sign([]byte(msg))
 }
+
 func Sign(msg string) string {
 	sig:= _cardInst.Sign([]byte(msg))
 	return base58.Encode(sig)

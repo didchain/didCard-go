@@ -1,6 +1,7 @@
 package androidgolib
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/didchain/didCard-go/account"
@@ -56,6 +57,41 @@ func Open(auth string) error {
 	}
 	return _cardInst.Open(auth)
 }
+
+
+type DeriveKey struct {
+	AesKey string `json:"aes_key"`
+	CardBytes []byte `json:"card_bytes"`
+}
+
+//AES Key is generate by a new salt, need to save it
+func DeriveAesKey(auth string) (string,error)  {
+	if _cardInst == nil {
+		return "",errors.New("no card instance")
+	}
+
+	aesKey,err := _cardInst.DriveAESKey(auth)
+	if err!=nil{
+		return "", err
+	}
+
+	dk:=&DeriveKey{
+		AesKey: aesKey,
+		CardBytes: _cardInst.Bytes(),
+	}
+	j,_:=json.Marshal(*dk)
+
+	return string(j),nil
+}
+
+func OpenWithAesKey(aesKey string) error  {
+	if _cardInst == nil {
+		return errors.New("no card instance")
+	}
+
+	return _cardInst.OpenWithAesKey(aesKey)
+}
+
 
 func IsOpen() bool {
 	if _cardInst == nil {
