@@ -2,11 +2,9 @@ package account
 
 import (
 	"crypto/ed25519"
-	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"github.com/btcsuite/btcutil/base58"
-	"io"
 	"io/ioutil"
 )
 
@@ -87,7 +85,6 @@ func (pw *PWallet)OpenWithAesKey(aeskey string) error{
 	return nil
 }
 
-//new salt, need save again
 func (pw *PWallet)DriveAESKey(auth string) (string,error) {
 	if pw.key != nil{
 		err:=pw.Open(auth)
@@ -96,18 +93,25 @@ func (pw *PWallet)DriveAESKey(auth string) (string,error) {
 		}
 	}
 
-	salt:=make([]byte,KP.S)
-	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
-		return "", err
-	}
+	//salt:=make([]byte,KP.S)
+	//if _, err := io.ReadFull(rand.Reader, salt); err != nil {
+	//	return "", err
+	//}
 
-	cipherTxt,aesk, err:=encryptPriKey(pw.key.PriKey,salt,auth)
+	//salt:=pw.DidAddr.ToPubKey()
+	//
+	//cipherTxt,aesk, err:=encryptPriKey(pw.key.PriKey,salt[:KP.S],auth)
+	//if err!=nil{
+	//	return "", err
+	//}
+	//
+	//pw.CipherTxt = cipherTxt
+	////pw.Salt = base58.Encode(salt)
+	salt:=pw.DidAddr.ToPubKey()
+	aesk,err:=aesKey(salt[:KP.S],auth)
 	if err!=nil{
 		return "", err
 	}
-
-	pw.CipherTxt = cipherTxt
-	pw.Salt = base58.Encode(salt)
 
 	return aesk,nil
 

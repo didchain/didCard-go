@@ -96,6 +96,15 @@ func decryptPriKey(salt []byte, cpTxt, auth string) (ed25519.PrivateKey, error) 
 	return Decrypt(aesKey, privBytes)
 }
 
+func aesKey(salt []byte,auth string) (string,error)  {
+	 aesk,err:= AESKey(salt, auth)
+	 if err!=nil{
+	 	return "", err
+	 }
+
+	 return base58.Encode(aesk),nil
+}
+
 func decryptPrivKeyByAesKey(aesKey []byte,cpTxt string) (ed25519.PrivateKey,error)  {
 	cipherByte := base58.Decode(cpTxt)
 	//fmt.Println("cipher base16 == >: ",hex.EncodeToString(cipherByte))

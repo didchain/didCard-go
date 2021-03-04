@@ -1,7 +1,6 @@
 package iosLib
 
 import (
-	"encoding/json"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/didchain/didCard-go/account"
 )
@@ -69,7 +68,7 @@ type DeriveKey struct {
 }
 
 //AES Key is generate by a new salt, need to save it
-func DeriveAesKey(auth string) (string)  {
+func DeriveAesKey(auth string) string {
 	if _cardInst == nil {
 		return ""
 	}
@@ -79,13 +78,7 @@ func DeriveAesKey(auth string) (string)  {
 		return ""
 	}
 
-	dk:=&DeriveKey{
-		AesKey: aesKey,
-		CardBytes: _cardInst.Bytes(),
-	}
-	j,_:=json.Marshal(*dk)
-
-	return string(j)
+	return aesKey
 }
 
 func OpenWithAesKey(aesKey string) string  {
