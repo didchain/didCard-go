@@ -1,6 +1,7 @@
 package iosLib
 
 import (
+	"encoding/json"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/didchain/didCard-go/account"
 )
@@ -119,4 +120,23 @@ func Sign(msg string) string {
 func Verify(pub []byte, msg interface{}, sig string) bool {
 	sigbytes:=base58.Decode(sig)
 	return account.VerifySig(account.ConvertToID2(pub), sigbytes, msg)
+}
+
+func SignMessage(did string, latitude, longitude float64, timestamp int64) string  {
+	msg:= struct {
+		DID       string `json:"did"` ///public key in string
+		TimeStamp int64 `json:"time_stamp"`
+		Latitude float64 `json:"latitude"`
+		Longitude float64 `json:"longitude"`
+	}{}
+
+	msg.DID = did
+	msg.TimeStamp = timestamp
+	msg.Latitude = latitude
+	msg.Longitude = longitude
+
+	j,_:=json.Marshal(msg)
+
+	return string(j)
+
 }

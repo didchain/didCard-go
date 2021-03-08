@@ -1,6 +1,7 @@
 package androidgolib
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/didchain/didCard-go/account"
@@ -112,4 +113,24 @@ func Close() {
 		return
 	}
 	_cardInst.Close()
+}
+
+
+func SignMessage(did string, latitude, longitude float64, timestamp int64) string  {
+	msg:= struct {
+		DID       string `json:"did"` ///public key in string
+		TimeStamp int64 `json:"time_stamp"`
+		Latitude float64 `json:"latitude"`
+		Longitude float64 `json:"longitude"`
+	}{}
+
+	msg.DID = did
+	msg.TimeStamp = timestamp
+	msg.Latitude = latitude
+	msg.Longitude = longitude
+
+	j,_:=json.Marshal(msg)
+
+	return string(j)
+
 }

@@ -4,6 +4,7 @@ import (
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/json"
+	"fmt"
 	"github.com/btcsuite/btcutil/base58"
 	"io/ioutil"
 )
@@ -141,6 +142,8 @@ func VerifySig(didAddr ID, sig []byte, v interface{}) bool {
 	if err != nil {
 		return false
 	}
+
+	fmt.Println(string(data))
 
 	return ed25519.Verify(didAddr.ToPubKey(), data, sig)
 }
