@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	AccPrefix       = "did"
-	AccIDLen        = 40
+	AccPrefix = "did"
+	AccIDLen  = 40
 )
 
 var (

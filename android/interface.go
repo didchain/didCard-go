@@ -58,29 +58,27 @@ func Open(auth string) error {
 	return _cardInst.Open(auth)
 }
 
-
 //AES Key is generate by a new salt, need to save it
-func DeriveAesKey(auth string) (string,error)  {
+func DeriveAesKey(auth string) (string, error) {
 	if _cardInst == nil {
-		return "",errors.New("no card instance")
+		return "", errors.New("no card instance")
 	}
 
-	aesKey,err := _cardInst.DriveAESKey(auth)
-	if err!=nil{
+	aesKey, err := _cardInst.DriveAESKey(auth)
+	if err != nil {
 		return "", err
 	}
 
-	return aesKey,nil
+	return aesKey, nil
 }
 
-func OpenWithAesKey(aesKey string) error  {
+func OpenWithAesKey(aesKey string) error {
 	if _cardInst == nil {
 		return errors.New("no card instance")
 	}
 
 	return _cardInst.OpenWithAesKey(aesKey)
 }
-
 
 func IsOpen() bool {
 	if _cardInst == nil {
@@ -99,12 +97,12 @@ func SignByPassword(msg, auth string) []byte {
 }
 
 func Sign(msg string) string {
-	sig:= _cardInst.Sign([]byte(msg))
+	sig := _cardInst.Sign([]byte(msg))
 	return base58.Encode(sig)
 }
 
 func Verify(pub []byte, msg interface{}, sig string) bool {
-	sigbytes:=base58.Decode(sig)
+	sigbytes := base58.Decode(sig)
 	return account.VerifySig(account.ConvertToID2(pub), sigbytes, msg)
 }
 
@@ -115,12 +113,11 @@ func Close() {
 	_cardInst.Close()
 }
 
-
-func SignMessage(did string, latitude, longitude float64, timestamp int64) string  {
-	msg:= struct {
-		DID       string `json:"did"` ///public key in string
-		TimeStamp int64 `json:"time_stamp"`
-		Latitude float64 `json:"latitude"`
+func SignMessage(did string, latitude, longitude float64, timestamp int64) string {
+	msg := struct {
+		DID       string  `json:"did"` ///public key in string
+		TimeStamp int64   `json:"time_stamp"`
+		Latitude  float64 `json:"latitude"`
 		Longitude float64 `json:"longitude"`
 	}{}
 
@@ -129,7 +126,7 @@ func SignMessage(did string, latitude, longitude float64, timestamp int64) strin
 	msg.Latitude = latitude
 	msg.Longitude = longitude
 
-	j,_:=json.Marshal(msg)
+	j, _ := json.Marshal(msg)
 
 	return string(j)
 

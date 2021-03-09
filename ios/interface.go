@@ -43,7 +43,7 @@ func Import(auth, jsonStr string) []byte {
 	if err != nil {
 		return nil
 	}
-	if err:=card.Open(auth);err!=nil {
+	if err := card.Open(auth); err != nil {
 		return nil
 	}
 	_cardInst = card
@@ -55,16 +55,15 @@ func Open(auth string) bool {
 		return false
 	}
 
-	if err:= _cardInst.Open(auth);err!=nil{
+	if err := _cardInst.Open(auth); err != nil {
 		return false
 	}
 
 	return true
 }
 
-
 type DeriveKey struct {
-	AesKey string `json:"aes_key"`
+	AesKey    string `json:"aes_key"`
 	CardBytes []byte `json:"card_bytes"`
 }
 
@@ -74,27 +73,25 @@ func DeriveAesKey(auth string) string {
 		return ""
 	}
 
-	aesKey,err := _cardInst.DriveAESKey(auth)
-	if err!=nil{
+	aesKey, err := _cardInst.DriveAESKey(auth)
+	if err != nil {
 		return ""
 	}
 
 	return aesKey
 }
 
-func OpenWithAesKey(aesKey string) string  {
+func OpenWithAesKey(aesKey string) string {
 	if _cardInst == nil {
 		return "no card instance"
 	}
 
 	err := _cardInst.OpenWithAesKey(aesKey)
-	if err!=nil{
+	if err != nil {
 		return "open failed"
 	}
 	return ""
 }
-
-
 
 func IsOpen() bool {
 	if _cardInst == nil {
@@ -113,20 +110,20 @@ func SignByPassword(msg, auth string) []byte {
 }
 
 func Sign(msg string) string {
-	sig:= _cardInst.Sign([]byte(msg))
+	sig := _cardInst.Sign([]byte(msg))
 	return base58.Encode(sig)
 }
 
 func Verify(pub []byte, msg interface{}, sig string) bool {
-	sigbytes:=base58.Decode(sig)
+	sigbytes := base58.Decode(sig)
 	return account.VerifySig(account.ConvertToID2(pub), sigbytes, msg)
 }
 
-func SignMessage(did string, latitude, longitude float64, timestamp int64) string  {
-	msg:= struct {
-		DID       string `json:"did"` ///public key in string
-		TimeStamp int64 `json:"time_stamp"`
-		Latitude float64 `json:"latitude"`
+func SignMessage(did string, latitude, longitude float64, timestamp int64) string {
+	msg := struct {
+		DID       string  `json:"did"` ///public key in string
+		TimeStamp int64   `json:"time_stamp"`
+		Latitude  float64 `json:"latitude"`
 		Longitude float64 `json:"longitude"`
 	}{}
 
@@ -135,7 +132,7 @@ func SignMessage(did string, latitude, longitude float64, timestamp int64) strin
 	msg.Latitude = latitude
 	msg.Longitude = longitude
 
-	j,_:=json.Marshal(msg)
+	j, _ := json.Marshal(msg)
 
 	return string(j)
 

@@ -24,7 +24,7 @@ type Wallet interface {
 
 	Open(auth string) error
 
-	DriveAESKey(auth string) (string,error)
+	DriveAESKey(auth string) (string, error)
 	OpenWithAesKey(key string) error
 
 	IsOpen() bool
@@ -35,15 +35,15 @@ type Wallet interface {
 }
 
 type WalletKey struct {
-	PriKey  ed25519.PrivateKey
+	PriKey ed25519.PrivateKey
 }
 
 type PWallet struct {
-	Version   int                 `json:"version"`
-	DidAddr   ID 				  `json:"did"`
-	Salt      string              `json:"salt,omitempty"`
-	CipherTxt string 			  `json:"cipher_txt"`
-	key       *WalletKey          `json:"-"`
+	Version   int        `json:"version"`
+	DidAddr   ID         `json:"did"`
+	Salt      string     `json:"salt,omitempty"`
+	CipherTxt string     `json:"cipher_txt"`
+	key       *WalletKey `json:"-"`
 }
 
 func NewWallet(auth string) (Wallet, error) {
@@ -53,7 +53,7 @@ func NewWallet(auth string) (Wallet, error) {
 		logger.Errorf("Error generate network key: %v", err)
 		return nil, err
 	}
-	cipherTxt,_, err := encryptPriKey(pri, pub[:KP.S], auth)
+	cipherTxt, _, err := encryptPriKey(pri, pub[:KP.S], auth)
 	if err != nil {
 		logger.Errorf("encrypt wallet err:%f", err)
 		return nil, err
@@ -61,27 +61,27 @@ func NewWallet(auth string) (Wallet, error) {
 
 	obj := &PWallet{
 		Version:   WalletVersion,
-		DidAddr:		ConvertToID2(pub),
+		DidAddr:   ConvertToID2(pub),
 		CipherTxt: cipherTxt,
 		key: &WalletKey{
-			PriKey:  pri,
+			PriKey: pri,
 		},
 	}
 	return obj, nil
 }
 
-func encryptPriKey(priKey ed25519.PrivateKey, salt []byte, auth string) (string,string, error) {
+func encryptPriKey(priKey ed25519.PrivateKey, salt []byte, auth string) (string, string, error) {
 	aesKey, err := AESKey(salt, auth)
 	if err != nil {
 		logger.Warning("error to generate aes key:->", err)
-		return "", "",err
+		return "", "", err
 	}
 	cipher, err := Encrypt(aesKey, priKey[:])
 	if err != nil {
 		logger.Warning("error to encrypt the raw private key:->", err)
-		return "","", err
+		return "", "", err
 	}
-	return base58.Encode(cipher),base58.Encode(aesKey), nil
+	return base58.Encode(cipher), base58.Encode(aesKey), nil
 }
 
 func decryptPriKey(salt []byte, cpTxt, auth string) (ed25519.PrivateKey, error) {
@@ -97,23 +97,22 @@ func decryptPriKey(salt []byte, cpTxt, auth string) (ed25519.PrivateKey, error) 
 	return Decrypt(aesKey, privBytes)
 }
 
-func aesKey(salt []byte,auth string) (string,error)  {
-	 aesk,err:= AESKey(salt, auth)
-	 if err!=nil{
-	 	return "", err
-	 }
+func aesKey(salt []byte, auth string) (string, error) {
+	aesk, err := AESKey(salt, auth)
+	if err != nil {
+		return "", err
+	}
 
-	 return base58.Encode(aesk),nil
+	return base58.Encode(aesk), nil
 }
 
-func decryptPrivKeyByAesKey(aesKey []byte,cpTxt string) (ed25519.PrivateKey,error)  {
+func decryptPrivKeyByAesKey(aesKey []byte, cpTxt string) (ed25519.PrivateKey, error) {
 	cipherByte := base58.Decode(cpTxt)
 	//fmt.Println("cipher base16 == >: ",hex.EncodeToString(cipherByte))
 	privBytes := make([]byte, len(cipherByte))
 	copy(privBytes, cipherByte)
 	return Decrypt(aesKey, privBytes)
 }
-
 
 func LoadWallet(wPath string) (Wallet, error) {
 	jsonStr, err := ioutil.ReadFile(wPath)
@@ -124,7 +123,8 @@ func LoadWallet(wPath string) (Wallet, error) {
 	w := new(PWallet)
 	if err := json.Unmarshal(jsonStr, w); err != nil {
 		logger.Errorf("error to parse wallet :%s", err)
-		return nil, err	}
+		return nil, err
+	}
 	return w, nil
 }
 
