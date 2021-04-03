@@ -137,3 +137,20 @@ func SignMessage(did string, latitude, longitude float64, timestamp int64) strin
 	return string(j)
 
 }
+
+func SignUserLoginMessage(did string, randomBytes string, loginUrl string) string{
+	msg:= struct {
+		DID string `json:"did"`
+		RandomBytes string `json:"random_bytes"`
+		LoginUrl string `json:"login_url"`
+	}{}
+
+	msg.DID = did
+	msg.RandomBytes = randomBytes
+	msg.LoginUrl = loginUrl
+
+	j,_:=json.Marshal(msg)
+
+	return string(j)
+
+}
