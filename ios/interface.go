@@ -138,16 +138,16 @@ func SignMessage(did string, latitude, longitude float64, timestamp int64) strin
 
 }
 
-func SignUserLoginMessage(did string, randomBytes string, loginUrl string) string{
+func SignUserLoginMessage(did string, randomToken string, authUrl string) string{
 	msg:= struct {
+		AuthUrl string `json:"auth_url"`
+		RandomToken string `json:"random_token"`
 		DID string `json:"did"`
-		RandomBytes string `json:"random_bytes"`
-		LoginUrl string `json:"login_url"`
 	}{}
 
 	msg.DID = did
-	msg.RandomBytes = randomBytes
-	msg.LoginUrl = loginUrl
+	msg.RandomToken = randomToken
+	msg.AuthUrl = authUrl
 
 	j,_:=json.Marshal(msg)
 
